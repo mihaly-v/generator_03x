@@ -616,7 +616,7 @@ footer {
         gap: 16px;
     }
 
-    /* 2. オーバーレイの中に表示するプレビュー画像 */
+    /* 2. オーバーレイの中に表示するプレビュー画像（背面プレビューの複製など） */
     .mobile-overlay-preview img {
         width: 100% !important;
         max-width: 100% !important;
@@ -624,6 +624,16 @@ footer {
         border-radius: 0 !important;
         box-shadow: none !important;
         display: block !important;
+    }
+
+    /* 2-b. オーバーレイの中に表示する実物のCanvasプレビュー（表面：background-layer / ui-layer） */
+    /*      .preview-fit ごと実物を移動してくるので、img と同じ幅いっぱいの見た目にする */
+    .mobile-overlay-preview .preview-fit {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .mobile-overlay-preview .preview {
+        box-shadow: none !important;
     }
 
     /* 3. 画面の右下に固定配置する「プレビューを表示」ボタン */
@@ -817,4 +827,6 @@ footer {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover;
+    cursor: move;
+    touch-action: none; /* ブラウザ標準のスクロール/ピンチズームと競合しないようにする */
 }

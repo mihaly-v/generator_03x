@@ -69,17 +69,34 @@
                 <h3 class="section-title">Card Style :</h3>
                 <div class="flex-row">
                     <div class="form-group">
-                        <label id="lblOrientation">▼ カードの向き</label>
+                        <label id="lblOrientation">// カードの向き</label>
                         <div class="flex-row" style="gap:4px; margin-top:2px;">                        
                             <label class="radio-label"><input type="radio" name="cardOrientation" value="vertical" checked=""><span id="optVert">縦型</span></label>
                             <label class="radio-label"><input type="radio" name="cardOrientation" value="horizontal"><span id="optHoriz">横型</span></label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label id="lblPattern">▼ パターン</label>
+                        <label id="lblPattern">// パターン</label>
                         <div class="flex-row" style="gap:4px; margin-top:2px;">
                             <label class="radio-label"><input type="radio" name="layoutPattern" value="A" checked=""><span>A</span></label>
                             <label class="radio-label"><input type="radio" name="layoutPattern" value="B"><span>B</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label id="lblMask">// マスク</label>
+                        <div class="flex-row" style="gap:4px; margin-top:2px;">
+                            <label class="radio-label"><input type="radio" name="layoutMask" value="off" checked=""><span>オフ</span></label>
+                            <label class="radio-label"><input type="radio" name="layoutMask" value="on"><span>オン</span></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label id="lblMaskPattern">// マスクパターン</label>
+                        <div class="flex-row" style="gap:4px; margin-top:2px;">
+                            <label class="radio-label"><input type="radio" name="layoutMaskPattern" value="mask-A.jpg" checked=""><span>A</span></label>
+                            <label class="radio-label"><input type="radio" name="layoutMaskPattern" value="mask-B.jpg"><span>B</span></label>
+                            <label class="radio-label"><input type="radio" name="layoutMaskPattern" value="mask-C.jpg"><span>C</span></label>
                         </div>
                     </div>
                 </div>

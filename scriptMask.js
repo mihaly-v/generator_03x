@@ -161,7 +161,10 @@ const uiCtx = uiLayer.getContext('2d');
 let maskImage = null;
 let maskCanvas = null;
 
-function loadMaskImage(src = 'mask.jpg') {
+let loadMask = null;
+// loadMask = 'mask.jpg';
+
+function loadMaskImage(src) { // 引数名を src に変更
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
@@ -182,11 +185,12 @@ function loadMaskImage(src = 'mask.jpg') {
             mCtx.putImageData(imgData, 0, 0);
 
             resolve(maskCanvas);
-            // マスク読み込み完了を他の処理（drawUserImageLayerなど）に通知
+            
+            // マスク読み込み完了を通知
             window.dispatchEvent(new CustomEvent('maskImageLoaded'));
         };
         img.onerror = (err) => reject(err);
-        img.src = src;
+        img.src = src; // 引数の src を指定
     });
 }
 
@@ -194,7 +198,7 @@ function loadMaskImage(src = 'mask.jpg') {
 // （読み込みが完了したタイミングで 'maskImageLoaded' イベントが発火するので、
 //   drawUserImageLayer 側でこれを購読して再描画すれば、
 //   マスクが後から読み込まれても正しく反映される）
-loadMaskImage('mask.jpg').catch((err) => {
+loadMaskImage('mask-A.jpg').catch((err) => {
     console.error('mask.jpg の読み込みに失敗しました:', err);
 });
 
@@ -619,6 +623,34 @@ document.querySelectorAll('input[name="textShadow"]').forEach(radio => {
     radio.addEventListener('change', () => {
         isUiCached = false; // UIキャッシュを使っている場合は、一度フラグをリセットして作り直させる
         renderCanvas();     // 再描画
+    });
+});
+// マスクのラジオボタンが変更されたらUIキャッシュをクリアして再描画
+document.querySelectorAll('input[name="layoutMask"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        isUiCached = false; // UIキャッシュを使っている場合は、一度フラグをリセットして作り直させる
+        // renderCanvas();     // 再描画
+        drawUserImageLayer();
+    });
+});
+// マスクパターンのボタンが変更されたらUIキャッシュをクリアして再描画
+document.querySelectorAll('input[name="layoutMaskPattern"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        isUiCached = false; // UIキャッシュをリセット
+        
+        // 💡 HTMLの value からファイル名（"mask-A.jpg" 等）をダイレクトに取得！
+        const selectedMaskFile = document.querySelector('input[name="layoutMaskPattern"]:checked').value;
+        
+        loadMask = selectedMaskFile; // 既存の管理変数に代入
+        console.log(`changeMask -> ${selectedMaskFile}`);
+
+        // 💡 選択されたマスクファイルをそのまま非同期ロードに回す
+        loadMaskImage(selectedMaskFile).then(() => {
+            // ロード完了後に背景レイヤーを再描画
+            drawUserImageLayer();
+        }).catch((err) => {
+            console.error(`${selectedMaskFile} の読み込みに失敗しました:`, err);
+        });
     });
 });
 
@@ -1150,25 +1182,26 @@ document.addEventListener("DOMContentLoaded", () => {
         closeBtn.innerHTML = isJP ? "✕ 閉じる" : "✕ CLOSE";
         overlay.appendChild(closeBtn);
 
-        // 4. 元のプレビュー画像（最新の状態のもの）を探して複製(clone)してオーバーレイに突っ込む
-        const originalFrontLoad = document.getElementById("resultLoadImage") 
-        const originalFront = document.getElementById("resultImage");
+        // 4. 表面プレビューは「複製(clone)」ではなく、実物の .preview-fit
+        //    （background-layer / ui-layer を含む、実際に触って操作しているCanvas）を
+        //    そのままオーバーレイへ移動させる。
+        //    複製だとCanvasに描かれている絵柄も、既存のドラッグ移動／ホイール・ピンチ拡縮の
+        //    イベントリスナーも引き継がれないため、実物を移動することで
+        //    「オーバーレイの中でも通常のプレビューと同様に移動・拡縮ができる」状態にする。
+        let previewFitOriginalParent = null;
+        let previewFitOriginalNextSibling = null;
+
+        if (previewSize) {
+            previewFitOriginalParent = previewSize.parentNode;
+            previewFitOriginalNextSibling = previewSize.nextSibling;
+            overlay.appendChild(previewSize); // 実物を移動（複製ではない）
+        }
+
+        // 背面プレビューは静止画のままでよいため、従来どおり複製して表示する
         const originalBack = document.getElementById("resultImageBack");
-
-
-        if (originalFrontLoad) {
-            const cloneFrontLoad = originalFrontLoad.cloneNode(true);
-            cloneFrontLoad.removeAttribute("id"); // IDの重複を避ける
-            overlay.appendChild(cloneFrontLoad);
-        }
-        if (originalFront) {
-            const cloneFront = originalFront.cloneNode(true);
-            cloneFront.removeAttribute("id"); // IDの重複を避ける
-            overlay.appendChild(cloneFront);
-        }
         if (originalBack) {
             const cloneBack = originalBack.cloneNode(true);
-            cloneBack.removeAttribute("id");
+            cloneBack.removeAttribute("id"); // IDの重複を避ける
             overlay.appendChild(cloneBack);
         }
 
@@ -1181,6 +1214,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 6. 「閉じる」タップ時の処理
         closeBtn.addEventListener("click", () => {
+            // ⚡ 移動させておいた実物の表面プレビュー（.preview-fit）を元の位置へ戻す
+            if (previewSize && previewFitOriginalParent) {
+                previewFitOriginalParent.insertBefore(previewSize, previewFitOriginalNextSibling);
+            }
+
             overlay.remove(); // オーバーレイを消去
             
             // ⚡ 【重要】プレビューが閉じたので、htmlとbodyのスクロールロックを解除
@@ -1291,27 +1329,52 @@ bgImage.addEventListener('change', (e) => {
                 bgCtx.restore();
             }
 
-            // 🎭 mask.jpg を使って background-layer 全体をマスク
-            // （maskCanvas は輝度→アルファ変換済み。白＝残す／黒＝消す）
-            if (maskCanvas) {
-                bgCtx.save();
-                bgCtx.globalCompositeOperation = 'destination-in';
-                bgCtx.drawImage(maskCanvas, 0, 0, backgroundLayer.width, backgroundLayer.height);
-                bgCtx.restore();
+            //マスクの描画設定
+            const layoutMask = document.querySelector('input[name="layoutMask"]:checked').value;
+            if(layoutMask === 'on'){
+                console.log("layoutMask === 'on'");
+                // 🎭 mask.jpg を使って background-layer 全体をマスク
+                // （maskCanvas は輝度→アルファ変換済み。白＝残す／黒＝消す）
+                if (maskCanvas) {
+                    bgCtx.save();
+                    bgCtx.globalCompositeOperation = 'destination-in';
+                    bgCtx.drawImage(maskCanvas, 0, 0, backgroundLayer.width, backgroundLayer.height);
+                    bgCtx.restore();
 
-                // マスクで透明になった部分の「下」に白を敷く
-                // （destination-over = 既存の内容の背面に描画するので、
-                //   透明部分だけが白で塗りつぶされ、残った画像部分はそのまま）
-                bgCtx.save();
-                bgCtx.globalCompositeOperation = 'destination-over';
-                bgCtx.fillStyle = '#ffffff';
-                bgCtx.fillRect(0, 0, backgroundLayer.width, backgroundLayer.height);
-                bgCtx.restore();
+                    // マスクで透明になった部分の「下」に白を敷く
+                    // （destination-over = 既存の内容の背面に描画するので、
+                    //   透明部分だけが白で塗りつぶされ、残った画像部分はそのまま）
+                    bgCtx.save();
+                    bgCtx.globalCompositeOperation = 'destination-over';
+                    bgCtx.fillStyle = '#ffffff';
+                    bgCtx.fillRect(0, 0, backgroundLayer.width, backgroundLayer.height);
+                    bgCtx.restore();
+                }
             }
         };
 
     // 🎭 マスク画像(mask.jpg)が後から読み込み完了した場合にも反映されるようにする
     window.addEventListener('maskImageLoaded', drawUserImageLayer);
+
+    // マスクの選択（A, B, C）や ON/OFF が変わった時の処理
+    function handleMaskChange() {
+        const layoutMask = document.querySelector('input[name="layoutMask"]:checked')?.value;
+        
+        if (layoutMask === 'on') {
+            // 選択されているマスクの値（例: 'mask-A.jpg', 'mask-B.jpg' など）を取得
+            // ※ HTML側にそういう select や radio があると想定しています
+            const selectedMask = document.querySelector('input[name="layoutMaskPattern"]:checked')?.value || 'mask-A.jpg';
+            
+            loadMaskImage(selectedMask).catch((err) => {
+                console.error(`${selectedMask} の読み込みに失敗しました:`, err);
+            });
+        } else {
+            // マスクOFFならそのまま再描画（マスク処理をスキップさせるため）
+            drawUserImageLayer();
+        }
+    }
+    //初回読み込み
+    handleMaskChange();
 
     // 画像アップロード
         bgImage.addEventListener('change', (e) => {
@@ -1468,8 +1531,12 @@ bgImage.addEventListener('change', (e) => {
         } else if (isDraggingX) {
             const loc = e.touches ? e.touches[0] : e;
             // マウスの移動をCanvasの解像度スケールに変換する際、
-            // 実際の表示サイズ（CSSの500px）とCanvasの内部解像度（1000px）の比率を考慮
-            const displayToInternalScale = BASE_WIDTH / 500; // 1000 / 500 = 2
+            // 実際の表示サイズとCanvasの内部解像度（BASE_WIDTH）の比率を考慮する。
+            // ⚡ 固定値（500px）ではなく、その時点の実際の表示幅から動的に算出することで、
+            // 　PC版（preview-panel内）でもスマホのオーバーレイプレビュー内でも、
+            // 　表示サイズが変わっても同じ感覚でドラッグ移動できるようにする。
+            const displayWidth = uiLayer.getBoundingClientRect().width || BASE_WIDTH;
+            const displayToInternalScale = BASE_WIDTH / displayWidth;
             
             const dx = (loc.clientX - imageTransform.lastX) * displayToInternalScale; 
             const dy = (loc.clientY - imageTransform.lastY) * displayToInternalScale;
