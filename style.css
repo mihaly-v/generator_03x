@@ -1,0 +1,820 @@
+:root {
+    --bg-main: #f1f3f7;
+    --bg-panel: #ffffff;
+    --text-main: #131619;
+    --text-muted: #626973;
+    --border-flat: #e1e7f0;
+    --border-focus: #00f0ff;
+    
+    --radius-sm: 3px;
+    --radius-md: 6px;
+    --transition: all 0.15s ease-in-out;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* それぞれのoption用のフォント指定 */
+.font-orbitron  { font-family: 'Orbitron', sans-serif; }
+.font-cinzel    { font-family: 'Cinzel', serif; }
+.font-montserrat{ font-family: 'Montserrat', sans-serif; }
+.font-techmono  { font-family: 'Share Tech Mono', monospace; }
+.font-notojp    { font-family: 'Noto Sans JP', sans-serif; }
+.font-mplus     { font-family: 'M PLUS 1p', sans-serif; }
+.font-notokr    { font-family: 'Noto Sans KR', sans-serif; }
+.font-blackhan  { font-family: 'Black Han Sans', sans-serif; }
+.font-rubik     { font-family: 'Rubik 80s Fade', sans-serif; }
+.font-syncopate { 
+  font-family: 'Syncopate', sans-serif; 
+  text-transform: uppercase; 
+}
+.font-audiowide { 
+  font-family: 'Audiowide', sans-serif; 
+}
+.font-majormono { 
+  font-family: 'Major Mono Display', monospace;
+}
+.font-stalinist { 
+  font-family: 'Stalinist One', sans-serif; 
+}
+.font-notable { 
+  font-family: 'Notable', sans-serif; 
+}
+.font-cinzeldec { 
+  font-family: 'Cinzel Decorative', serif; 
+}
+.font-gasoek { 
+  font-family: 'Gasoek One', sans-serif; 
+}
+.font-delagothic { 
+  font-family: 'Dela Gothic One', sans-serif; 
+}
+.font-hachimaru { 
+  font-family: 'Hachi Maru Pop', sans-serif; 
+}
+
+body {
+    font-family:  'Noto Sans JP', Arial, sans-serif;
+    /* background-color: var(--bg-main); */
+    background-color:#d8e6e9;
+    background: linear-gradient(135deg, #c1c6ce 0%, #d7d9db 100%);
+    background: linear-gradient(135deg, #4a8c91 0%, #803e68 100%);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+header {
+    background-color: var(--bg-panel);
+    border-bottom: 2px solid var(--border-flat);
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 56px;
+    z-index: 100;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+.header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    /* color: var(--text-main); */
+    color: #4a8c91;
+    letter-spacing: 0.5px;
+    padding-left: 10px;
+    border-left: 4px solid #4a8c91;
+}
+/* .lang-switcher { display: flex; gap: 6px; } */
+.lang-btn {
+    background: var(--bg-main);
+    border: 1px solid var(--border-flat);
+    color: var(--text-muted);
+    padding: 4px 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+}
+.lang-btn.active, .lang-btn:hover {
+    background: var(--text-main);
+    color: #fff;
+    border-color: var(--text-main);
+}
+
+.center-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    /* background-color: var(--bg-main); */
+}
+
+.main-container {
+    display: flex;
+    flex-direction: row; 
+    flex-wrap: nowrap;
+    justify-content: center; /* 一体化させ中央へ寄せる */
+    width: 100%;
+    max-width: 1220px; /* ⚠️ 600px + 600px + 間隔固定20px = 1220px */
+    /* height: calc(100vh - 56px); */
+    height: auto;
+}
+
+/* ⚙️ 左側：メニュー (最大横幅 600px) */
+.control-panel {
+    width: 50%;
+    max-width: 600px; /* 👈 600pxに固定制限 */
+    flex-shrink: 0;
+    /* background-color: var(--bg-panel);
+    border-left: 2px solid var(--border-flat); */
+    padding: 16px;
+    overflow-y: auto;
+}
+
+/* 🖼️ 右側：プレビュー (最大横幅 600px / 間隔は20pxで完全固定) */
+.preview-panel {
+    width: 50%;
+    max-width: 600px; /* 👈 600pxに固定制限 */
+    flex-shrink: 0;
+    /* background-color: var(--bg-main);
+    border-left: 20px solid var(--bg-main); 
+    border-right: 2px solid var(--border-flat); */
+    padding: 20px 20px 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    gap: 8px;
+}
+
+.save-btn,.saveBack-btn {
+    position: relative; 
+    overflow: hidden;  
+    background-color: rgba(0, 250, 255, 0.25);
+    color: #ffffff;
+    border: 1px solid #00f0ff;
+    margin-top: 16px;
+    width: 240px;
+    height: 48px;
+    /* border: 1px solid #ffffff; */
+    border-radius: 6px;
+    font-size: 16px;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+    /* transition: all 0.3s ease; */
+}
+.x-btn {
+    position: relative; 
+    overflow: hidden;
+    margin-top: 16px;
+    width: 240px;
+    height: 48px;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #ffffff;
+    border-radius: 6px;
+    font-size: 16px;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.save-btn::after,.saveBack-btn::after,.x-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%; /* スタート時はボタンの左側に隠しておく */
+    width: 50%;  /* 光の線の幅 */
+    height: 100%;
+    
+    /* 斜めの白いグラデーション光を作る */
+    background: linear-gradient(
+        90deg, 
+        rgba(255, 255, 255, 0) 0%, 
+        rgba(255, 255, 255, 0.6) 50%, 
+        rgba(255, 255, 255, 0) 100%
+    );
+    
+    transform: skewX(-25deg); /* 線を斜めにする */    
+}
+
+.save-btn:hover,.saveBack-btn:hover,.x-btn:hover {
+    background-color: rgba(0, 250, 255, 0.5);
+    color: #ffffff;
+    border: 1px solid #00f0ff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+}
+.x-btn:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #00f0ff;
+    border: 1px solid #00f0ff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+}
+.save-btn:hover::after,.saveBack-btn:hover::after,.x-btn:hover::after {
+
+    animation: btnAnimation 1.6s ease-in-out forwards infinite;
+}
+@keyframes btnAnimation{
+0% {
+    left: -100%;
+  }
+  100% {
+    left: 150%; /* ボタンの右側まで完全に突き抜ける */
+  }
+}
+
+.section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    /* color: var(--text-main); */
+    color: #ffffff;
+    margin: 18px 0 8px 0;
+    /* border-left: 4px solid var(--text-main); */
+    border-left: 4px solid #00f0ff;
+    padding-left: 8px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+.form-group {
+    margin-bottom: 10px;
+    /* background: var(--bg-main); */
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    /* color: var(--text-muted); */
+    /* color:#3a3a3a; */
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+/*  日本語・英語切り替え時にフォントサイズや高さがガタつかないよう固定統一 */
+input[type="text"], select, textarea {
+    width: 100%;
+    height: 42px; 
+    /* background-color: var(--bg-panel); */
+    border: 2px solid var(--border-flat);
+    /* color: var(--text-main); */
+    padding: 0 10px; /* 上下パディングを排しheightベースで中央寄せ */
+    font-family: 'Noto Sans JP', sans-serif; 
+    font-size: 14px; 
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+select option,optgroup {
+    color: #ffffff;
+    background-color: #606060;
+}
+input[type="text"]::placeholder { 
+    flex: 1.5; color: #cacaca;
+}
+textarea {
+    height: 110px; /* テキストエリアのみ独自の高さを許可 */
+    padding: 10px;
+}
+input[type="text"]:focus, select:focus, textarea:focus {
+    border-color: var(--border-focus);
+    outline: none;
+}
+
+.name-input-container { display: flex; gap: 8px; }
+.name-input-container input { 
+    flex: 1.5; color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+.name-input-container input::placeholder { 
+    flex: 1.5; color: #cacaca;
+}
+.name-input-container select { 
+    flex: 1; color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 42px; /* 👈 高さを他のフォームと統一 */
+    /* background-color: var(--bg-panel); */
+    border: 1px solid var(--border-flat);
+    /* color: var(--text-main); */
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+.custom-file-upload:hover {
+    border-color: var(--border-focus);
+    background-color: rgba(0, 240, 255, 0.02);
+}
+.custom-file-upload input[type="file"] { display: none; }
+
+.comment-container {
+    /* background-color: var(--bg-panel); */
+    border: 1px solid var(--border-flat);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.25);
+    margin-bottom: 6px;
+}
+.comment-container textarea::placeholder {
+    color: #cacaca;
+}
+.comment-container:focus-within { border-color: var(--border-focus); }
+.comment-container textarea {
+    border: none;
+    resize: none;
+    
+}
+.comment-font-select {
+    border: none;
+    border-top: 1px solid var(--border-flat);
+    /* background-color: var(--bg-main); */
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    height: 34px; /* セレクトボックス単体で収まるサイズ */
+    font-size: 13px;
+    cursor: pointer;
+    color: #626973;
+    background-color: rgba(255, 255, 255, 0.75)   ;
+}
+
+.flex-row { display: flex; gap: 8px; }
+.flex-row > * { flex: 1; min-width: 0; }
+
+input[type="radio"],
+input[type="checkbox"],
+input[type="range"] {
+  accent-color: #00f0ff; /* 選択時の色を指定 */
+  border: solid #fff;
+}
+input[type="range"] {
+    width: 100%;
+    max-width: 240px;
+}
+
+.alphaWrap {
+    padding-top: 10px;
+    text-align: center;
+    /* font-family: "Orbitron", sans-serif; */
+}
+.alphaWrap span {
+    display: none;
+}
+
+
+/* 🌟 プレイスタイル、好きな種族、ストーリーを「横3列」に完全固定 */
+.checkbox-grid, .story-progress-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 👈 厳格に3等分 */
+    gap: 0px 6px;
+}
+.checkbox-label, .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px; /* 👈 チェックボックスパネルの高さも一律統一 */
+    font-size: 13px; /* 👈 テキストのはみ出しを防ぐため13pxに固定 */
+    background: var(--bg-panel);
+    padding: 0 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid var(--border-flat);
+    overflow: hidden;
+    
+}
+.checkbox-label span, .radio-label span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    
+}
+.checkbox-label input, .radio-label input { flex-shrink: 0; transform: scale(1.05); }
+
+input[type="color"] {
+    -webkit-appearance: none;
+    border: 2px solid var(--border-flat);
+    width: 100%;
+    height: 42px; /* 👈 高さを統一 */
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; }
+
+.palette-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+.palette-btn {
+    /* background: var(--bg-panel); */
+    border: 1px solid var(--border-flat);
+    padding: 6px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+.palette-btn:hover {
+    background-color: rgba(255, 255, 255, 0.75);
+}
+.palette-btn:hover .palette-label {
+    color: #000000;
+}
+.palette-preview { display: flex; width: 100%; height: 14px; overflow: hidden; }
+.palette-color { flex: 1; }
+.palette-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: "Orbitron", Arial, sans-serif; color: #ffffff;}
+
+.preview-wrapper {
+    width: 100%;
+    max-width: 560px;
+    /* background: var(--bg-panel); */
+    background-color: rgba(255, 255, 255, 0.15);
+    /* border: 2px solid var(--border-flat); */
+    padding: 12px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+.neon-badge {
+    width: 96%;
+    padding-left: 8px;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 900;
+    /* color: var(--text-main); */
+    color: #ffffff;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    border-left: 4px solid #00f0ff;
+}
+.image-clip-container {
+    width: 100%;
+    overflow: hidden;
+    background-color: #ebedf2;
+    border: 1px solid var(--border-flat);
+    border-radius: var(--radius-sm);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+.preview-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+.preview-image.interactive-front { 
+    cursor: move; 
+    display: none;
+}
+.inst-text { font-size: 12px; color: #ffffff; text-align: center; margin-top: 4px; margin-bottom: 20px; max-width: 560px; }
+
+footer {
+    background-color: var(--bg-panel);
+    border-top: 2px solid var(--border-flat);
+    padding: 10px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.footer-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: var(--transition);
+}
+.footer-link:hover {
+    color: var(--text-main);
+    text-decoration: underline;
+}
+
+#cardLoadCanvas,#cardCanvas, #cardCanvasBack, #hiddenQrContainer { display: none; }
+
+/* プレビュー画像にカード風の角丸と陰影を追加 */
+#resultImage, #resultImageBack {
+    border-radius: 0px; /* カードの角を丸く */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); /* 近未来的な浮遊感のある影 */
+    overflow: hidden;
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.2s ease;
+}
+
+/* 点灯式の選択メニュー（チェックボックス・ラジオボタン）の上下の隙間を広げる */
+.checkbox-label, .radio-label {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    display: inline-flex;
+    align-items: center;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+/* 📱 画面幅が 768px 以下のスマホサイズ時の設定 */
+@media (max-width: 768px) {
+    /* 1. 外側のボディとメインコンテナの余計な余白を完全にゼロにする */
+    html, body, .app-container, .main-container { 
+        display: flex;
+        flex-direction: column; 
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 100vh;
+        position: relative !important;
+        margin: 0 !important;      /* ⚡ 外側の余計なマージンをリセット */
+        padding: 0 !important;     /* ⚡ 左右の隙間をなくして画面端まで広げる */
+        box-sizing: border-box;
+        overflow-x: hidden;        /* 横スクロール（ガタつき）を防止 */
+    }
+
+    /* 🛠️ 2. コントロールパネル（画面横幅いっぱいにピタッと配置） */
+    .control-panel, .settings-panel, .form-container {
+        order: 1; 
+        width: 100% !important;        
+        max-width: 100% !important;    
+        height: auto !important;       
+        position: relative !important; 
+        top: 0 !important;             
+        left: 0 !important;
+        margin: 0 0 20px 0 !important; /* ⚡ 左右マージンは0、下側にだけ少し隙間を空ける */
+        padding: 15px !important;      /* 内側の文字の詰まり具合はお好みで調整してください */
+        box-sizing: border-box;
+        flex: none !important;
+    }
+
+    /* 🖼️ 3. プレビュー画面（コントロールパネルの真下に配置） */
+    .preview-panel, .canvas-container {
+        order: 2; 
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;       
+        position: relative !important; 
+        top: 0 !important;
+        left: 0 !important;
+        margin: 0 0 20px 0 !important; /* ⚡ 左右マージンは0、下側のフッターとの間にだけ隙間 */
+        padding: 0 !important;         /* プレビュー外側の余計なパディングを排除 */
+        box-sizing: border-box;
+        flex: none !important;
+        border-left: 0; 
+        border-right: 0;
+    }
+
+    /* 📝 4. フッター（プレビューの真下、最底面にピタッと配置） */
+    footer, .footer-container {
+        order: 3; 
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important; 
+        bottom: 0 !important;
+        left: 0 !important;
+        margin: 0 !important;          /* ⚡ 無駄なマージンを完全に排除 */
+        padding: 20px 15px !important; /* フッター内の上下左右の余白 */
+        clear: both !important;        
+        box-sizing: border-box;
+    }
+    
+
+    /* 1. 操作メニュー（サイドパネル）の上に完全に重なる独立したプレビュー枠 */
+    .mobile-overlay-preview {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 99999 !important; /* すべての要素の最前面 */
+        background-color: rgb(255, 255, 255, 0.75);
+        /* var(--bg-main) !important; */
+        padding: 60px 20px 20px 20px !important; /* 上部に閉じるボタン用の余白 */
+        overflow-y: auto !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    /* 2. オーバーレイの中に表示するプレビュー画像 */
+    .mobile-overlay-preview img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        display: block !important;
+    }
+
+    /* 3. 画面の右下に固定配置する「プレビューを表示」ボタン */
+    .mobile-preview-trigger {
+        position: fixed;
+        top: 70vh;
+        right: -2px;
+        z-index: 9999;
+        background-color: rgba(90, 90, 90, 0.95);
+        /* var(--text-main); */
+        color: #ffffff;
+        border: 2px solid var(--border-focus);
+        padding: 12px 20px;
+        border-radius: 10px 0 0 10px;
+        /* var(--radius-md); */
+        font-family: 'Orbitron', sans-serif;
+        font-size: 13px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0, 240, 255, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .mobile-preview-trigger:hover {
+        background-color: rgba(0, 240, 255, 0.95);
+    }
+    .mobile-preview-trigger.is-hidden {
+        display: none !important;
+    }
+
+    /* 4. オーバーレイ専用の「閉じる」ボタン */
+    .mobile-preview-close {
+        position: fixed;
+        top: 70vh;
+        right: -2px;
+        z-index: 100000;
+        background-color: rgba(90, 90, 90, 0.95);
+        
+        color: #fff;
+        border: 2px solid var(--border-focus);
+        padding: 12px 20px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0, 240, 255, 0.3);
+        border-radius: 10px 0 0 10px;
+    }
+}
+
+/* PC表示時はこれらのスマホ専用ボタンやオーバーレイ構造を非表示 */
+@media (min-width: 769px) {
+    .mobile-preview-trigger, .mobile-preview-close, .mobile-overlay-preview {
+        display: none !important;
+    }
+}
+
+
+/* ========================================================
+   🌐 言語切り替えボタン（サイバーテック・デザイン）
+   ======================================================== */
+
+/* 通常時（PC版）の非表示・表示の強制固定 */
+.lang-short {
+    display: none !important; /* ⚡ 競合に負けないよう important を追加 */
+}
+.lang-full {
+    display: inline !important;
+}
+
+/* ボタンを囲むコンテナ */
+.lang-switcher {
+    display: flex;
+    gap: 6px;               /* ボタン同士の隙間 */
+    background: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
+    padding: 3px;
+    border: 1px solid #00f0ff; /* ネオンブルーの極細枠 */
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.2); /* ほんのり光るグロー効果 */
+}
+
+/* ボタン単体のデザイン */
+.lang-switcher button {
+    background: transparent;
+    border: none;
+    color: #888;            /* 通常時は少し暗めの文字色 */
+    font-family: 'Orbitron', Courier, monospace; /* メカニカルなフォント */
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 2px;
+    text-transform: uppercase;
+}
+
+/* マウスホバー時 */
+.lang-switcher button:hover {
+    color: #00f0ff;
+    background: rgba(0, 240, 255, 0.1);
+}
+
+/* ⚡ アクティブ（現在選択中）のボタンデザイン */
+.lang-switcher button.active {
+    background: #00f0ff !important; /* ネオンブルーで満たす */
+    color: #000000 !important;      /* 文字は反転して引き締まった黒に */
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5); /* 選択中は強く光らせる */
+}
+
+
+/* ========================================================
+   📱 スマホサイズ（幅 768px 以下）の切り替え
+   ======================================================== */
+@media (max-width: 768px) {
+    /* ⚡ スマホの時はフル表記を完全に消し、ショート(JP/EN)だけを出す */
+    .lang-full {
+        display: none !important;
+    }
+    .lang-short {
+        display: inline !important; /* ⚡ こちらも強制有効化 */
+    }
+
+    /* スマホ画面に合わせてボタンを少しコンパクトに引き締め */
+    .lang-switcher button {
+        padding: 4px 8px !important;
+        font-size: 11px;
+    }
+}
+
+
+
+.time-grid {
+    
+    display: grid;
+    grid-template-columns: repeat(12, 1fr); /* 8個×3行＝24個 */
+    gap: 8px 4px;
+    margin-top: 8px;
+}
+
+.time-selector-btn {
+    /* background: #fff; */
+    border: none;
+    border-radius: 2px;
+    padding: 6px 0;
+    font-size: 10px;
+    cursor: pointer;
+    border: 1px solid var(--border-flat);
+    font-family: "Orbitron", sans-serif;
+    font-weight: lighter;
+    /* color: #626973; */
+    background-color: rgba(0, 0, 0, 0.25);
+    color: #ffffff;
+}
+.time-selector-btn:hover {
+    background-color: rgba(0, 250, 255, 0.25);
+}
+
+/* 選択時の点灯スタイル */
+.time-selector-btn.active {
+    background: var(--border-focus); /* CSS変数のメインカラー */
+    color: #fff;
+    font-weight: bold;
+}
+
+
+/*  */
+
+.preview_fit {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1000/1545;
+}
+.preview {
+    /* background-color: aqua; */
+    position: relative;
+    /* height: 772.5px ;
+    width: 500px ; */
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    margin: 0 auto;
+
+    
+}
+.preview canvas {        
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
