@@ -125,6 +125,7 @@ const resultImageBack = document.getElementById('resultImageBack');
 const themeColorPicker = document.getElementById('themeColorPicker');
 const themeColorPicker2 = document.getElementById('themeColorPicker2'); 
 const shadowColorPicker = document.getElementById('shadowColorPicker');
+const backColorPicker = document.getElementById('backColorPicker'); 
 const alphaSlider = document.getElementById('alphaSlider');
 const textFontName = document.getElementById('textFontName'); const textFontComment = document.getElementById('textFontComment');
 const backCommentInput = document.getElementById('backComment'); const xTwitterIDInput = document.getElementById('xTwitterID');
@@ -363,11 +364,11 @@ function constructFormOptions() {
 
 // 各フォーム要素への一括イベント登録
     document.querySelectorAll('input, select, textarea').forEach(el => {
-        if (el.id === 'themeColorPicker' || el.id === 'themeColorPicker2' || el.id === 'shadowColorPicker' || el.id === 'alphaSlider') {
+        if (el.id === 'themeColorPicker' || el.id === 'themeColorPicker2' || el.id === 'shadowColorPicker' || el.id === 'backColorPicker' ||el.id === 'alphaSlider') {
             
             // つまみをドラッグしている最中（input）
             el.oninput = function(e) {
-                if (el.id === 'alphaSlider' || el.id === 'shadowColorPicker') {
+                if (el.id === 'alphaSlider' || el.id === 'shadowColorPicker' || el.id === 'backColorPicker' || el.id === 'themeColorPicker' || el.id === 'themeColorPicker2') {
                     isUiCached = false; 
                 }
                 
@@ -384,7 +385,7 @@ function constructFormOptions() {
             
             // つまみを離した時 / 確定した時（change）
             el.onchange = function(e) {
-                if (el.id === 'alphaSlider' || el.id === 'shadowColorPicker') {
+                if (el.id === 'alphaSlider' || el.id === 'shadowColorPicker' || el.id === 'backColorPicker' || el.id === 'themeColorPicker' || el.id === 'themeColorPicker2') {
                     isUiCached = false;
                 }
                 const targetElement = e.target;
@@ -493,6 +494,7 @@ function updateCard(e) {
     if (e && e.target && (e.target.id === 'alphaSlider' || e.target.type === 'range' || e.target.type === 'color')) {
         isUiCached = false; // UIキャッシュをクリア
         renderCanvas(); // 画面の再描画だけを行う（HTML要素を再構築しない）
+        
         return; 
     }
 
@@ -663,6 +665,8 @@ function renderCanvas() {
     const backComment = backCommentInput.value || '';
     const themeColor = themeColorPicker.value; const alertColor = themeColorPicker2.value; 
     const backTextColor = getAutomaticBackTextColor(themeColor);
+    const backColor = backColorPicker.value; 
+    const backNameColor = getAutomaticBackTextColor(backColor);
     const fontForName = textFontName.value; const fontForComment = textFontComment.value;
 
     let targetJobObj = { code: "N/A", en: "UNKNOWN" };
@@ -781,7 +785,7 @@ function renderCanvas() {
     applyUiShadowIfEnabled(ctxBack);
     ctxBack.fillStyle = themeColor; ctxBack.fillRect(0, 0, backW, backH);
     ctxBack.strokeStyle = alertColor; ctxBack.lineWidth = 5; ctxBack.strokeRect(20, 20, backW - 40, backH - 40);
-    ctxBack.strokeStyle = backTextColor; ctxBack.lineWidth = 1.5; ctxBack.strokeRect(28, 28, backW - 56, backH - 56);
+    ctxBack.strokeStyle = alertColor; ctxBack.lineWidth = 1.5; ctxBack.strokeRect(28, 28, backW - 56, backH - 56);
     
     // ⚡【裏面】縦型と横型で数値を切り替えて1箇所だけに配置
     let backWavePt;
@@ -806,7 +810,8 @@ function renderCanvas() {
     ctxBack.textBaseline = 'middle'; ctxBack.textAlign = 'center'; ctxBack.fillStyle = alertColor;
     ctxBack.font = 'bold 50px "Orbitron", sans-serif'; ctxBack.fillText('FINAL FANTASY XIV', backW / 2, backH * 0.15);
     
-    ctxBack.save(); ctxBack.fillStyle = (backTextColor === '#ffffff') ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.90)';
+    ctxBack.save(); ctxBack.fillStyle =backColor;
+    //  (backTextColor === '#ffffff') ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.90)';
     let signFontSize = 300; 
     const maxSignWidth = backW * 0.8; // ⚡ これ以上はみ出してほしくない最大横幅（裏面幅の80%）
 
@@ -821,10 +826,10 @@ function renderCanvas() {
     }
 
     ctxBack.translate(backW / 2, backH * 0.45); ctxBack.rotate(-2 * Math.PI / 180); ctxBack.fillText(name, 0, 0); ctxBack.restore();    
-    ctxBack.save(); ctxBack.fillStyle = backTextColor; ctxBack.font = `30px ${fontForComment}`; ctxBack.textAlign = 'center'; ctxBack.textBaseline = 'top';
+    ctxBack.save(); ctxBack.fillStyle = backColor; ctxBack.font = `30px ${fontForComment}`; ctxBack.textAlign = 'center'; ctxBack.textBaseline = 'top';
     wrapAndDrawText(ctxBack, backComment, backW / 2, backH * 0.65, 800, 48); ctxBack.restore();
     
-    ctxBack.fillStyle = backTextColor; ctxBack.font = `900 54px "Orbitron", sans-serif`; ctxBack.fillText(name, backW / 2, backH * 0.85); 
+    ctxBack.fillStyle = backColor; ctxBack.font = `900 54px "Orbitron", sans-serif`; ctxBack.fillText(name, backW / 2, backH * 0.85); 
     drawCyberBarcode(ctxBack, backW / 2 - 220, backH - 110, 440, 45, alertColor, alertColor, generatedID); 
     
     if (cachedQrSourceCanvas) {
@@ -1659,6 +1664,14 @@ bgImage.addEventListener('change', (e) => {
         // 9. 【後処理】保存が終わったら、元のプレビュー状態を維持するために再描画しておく
         drawUserImageLayer();
         renderCanvas();
+    });
+
+    document.getElementById('saveBack-btn').addEventListener('click', () => {
+        const dataURL = canvasBack.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'REAR-CARD.png'; // 保存時のファイル名
+        link.href = dataURL;
+        link.click(); // ダウンロード実行
     });
 
     document.getElementById('x-btn').addEventListener('click', () => {

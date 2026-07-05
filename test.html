@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .preview {
+            /* background-color: aqua; */
+            position: relative;
+            height: 772.5px !important;
+            width: 500px !important;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            margin: 0 auto;
+        }
+        canvas {
+            
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div id="top-controls" class="control-section">
+        <label for="uploadImage" class="file-upload-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+            <span>画像をアップロード</span>
+        </label>
+        <input type="file" id="uploadImage" accept="image/*" class="file-upload-input">
+        <p id="fileName" class="file-name-display"></p>
+    </div>
+
+    <div>
+        <select id="templateSelect">
+            <option value="a">a</option>
+            <option value="b">b</option>
+            <option value="c">c</option>
+        </select>
+        <button id="save-btn">save</button>
+    </div>
+
+    <div class="preview">
+        <canvas id="background-layer" width="1000" height="1545"></canvas>
+        <canvas id="ui-layer" width="1000" height="1545"></canvas>
+    </div>
+</body>
+<script>
+    const BASE_WIDTH = 1000;
+    const BASE_HEIGHT = 1545;
+    const SCALE_FACTOR = 1.0; 
+    const CANVAS_WIDTH = BASE_WIDTH * SCALE_FACTOR;
+    const CANVAS_HEIGHT = BASE_HEIGHT * SCALE_FACTOR;
+
+    const backgroundLayer = document.getElementById('background-layer');
+    const uiLayer = document.getElementById('ui-layer');
+    const bgCtx = backgroundLayer.getContext('2d');
+    const uiCtx = uiLayer.getContext('2d');
+
+    // ★最適化: アイコン群をキャッシュしておくためのCanvas（これにアイコンを全部描く）
+    const iconCompositeCanvas = document.createElement('canvas');
+    iconCompositeCanvas.width = CANVAS_WIDTH;
+    iconCompositeCanvas.height = CANVAS_HEIGHT;
+    const iconCompositeCtx = iconCompositeCanvas.getContext('2d');
+    
+    const fileNameDisplay = document.getElementById('fileName');
+    const uploadImageInput = document.getElementById('uploadImage');
+
+    // imageTransformに minScale を追加
+    let imageTransform = { 
+        img: null, 
+        x: BASE_WIDTH / 2, 
+        y: BASE_HEIGHT / 2, 
+        scale: 1.0, 
+        minScale: 1.0, // ★追加
+        isDragging: false, 
+        lastX: 0, 
+        lastY: 0 
+    };
+
+// 画像アップロード時の処理を修正
+uploadImageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) { imageTransform.img = null; drawUserImageLayer(); return; }
+    fileNameDisplay.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+            imageTransform.img = img;
+            imageTransform.x = BASE_WIDTH / 2;
+            imageTransform.y = BASE_HEIGHT / 2;
+            
+            const canvasAspect = BASE_WIDTH / BASE_HEIGHT;
+            const imgAspect = img.width / img.height;
+            
+            // ★余白を出さない（cover）ための最小拡大率を計算
+            // 横長画像なら高さをCanvasに合わせ、縦長画像なら幅をCanvasに合わせる
+            imageTransform.minScale = (imgAspect > canvasAspect) 
+                ? (BASE_HEIGHT / img.height) 
+                : (BASE_WIDTH / img.width);
+            
+            // 初期状態は最小スケール（画面ぴったり）にする
+            imageTransform.scale = imageTransform.minScale;
+            
+            drawUserImageLayer(); 
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+});    
+    // Layer 1: ユーザー画像
+        const drawUserImageLayer = () => {
+            bgCtx.setTransform(1, 0, 0, 1, 0, 0); 
+            bgCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            bgCtx.fillStyle = '#000000';
+            bgCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            if (imageTransform.img) {
+                bgCtx.save();
+                bgCtx.translate(imageTransform.x, imageTransform.y);
+                bgCtx.scale(imageTransform.scale, imageTransform.scale);
+                bgCtx.drawImage(imageTransform.img, -imageTransform.img.width / 2, -imageTransform.img.height / 2);
+                bgCtx.restore();
+            }
+        };
+
+    // 画像アップロード
+        uploadImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) { imageTransform.img = null; drawUserImageLayer(); return; }
+            fileNameDisplay.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    imageTransform.img = img;
+                    imageTransform.x = BASE_WIDTH / 2;
+                    imageTransform.y = BASE_HEIGHT / 2;
+
+                    const canvasAspect = BASE_WIDTH / BASE_HEIGHT;
+                    const imgAspect = img.width / img.height;
+
+                    imageTransform.minaScale = (imgAspect > canvasAspect) 
+                    ? (BASE_HEIGHT / img.height) 
+                    : (BASE_WIDTH / img.width);
+
+                    // 初期状態は最小スケール（画面ぴったり）にする
+                    imageTransform.scale = imageTransform.minScale;
+
+                    drawUserImageLayer(); 
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    //
+    // --- 拡大縮小・移動 (UIレイヤーでのイベント) ---
+    let isDragging = false;
+    let animationFrameId = null;
+    let initialDistance = 0;
+    let initialScale = 1.0;
+
+    const getDistance = (touches) => {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    uiLayer.addEventListener('wheel', (e) => {
+        if (!imageTransform.img) return;
+        e.preventDefault();
+        const scaleAmount = 0.1;
+        if (e.deltaY < 0) {
+            imageTransform.scale += scaleAmount;
+        } else {
+            // ★ 0.1 ではなく minScale で制限する
+            imageTransform.scale = Math.max(imageTransform.minScale, imageTransform.scale - scaleAmount);
+        }
+        
+        // ★縮小した結果、位置がズレて余白が出るのを防ぐため、移動制限関数を呼ぶ（後述）
+        checkBounds();
+
+        if (!animationFrameId) {
+            animationFrameId = requestAnimationFrame(() => {
+                drawUserImageLayer();
+                animationFrameId = null;
+            });
+        }
+    });
+
+    // ★新しく追加する移動制限関数
+    const checkBounds = () => {
+        if (!imageTransform.img) return;
+
+        // 現在のスケールでの画像サイズ
+        const scaledWidth = imageTransform.img.width * imageTransform.scale;
+        const scaledHeight = imageTransform.img.height * imageTransform.scale;
+
+        // 中心座標(x, y)が移動できる限界を計算
+        // 例：画像左端が0を超えない ＝ 中心xは (scaledWidth / 2) 以下にはならない
+        const minX = BASE_WIDTH - (scaledWidth / 2);
+        const maxX = scaledWidth / 2;
+        const minY = BASE_HEIGHT - (scaledHeight / 2);
+        const maxY = scaledHeight / 2;
+
+        // 算出した範囲内に中心座標を丸める（clamp）
+        imageTransform.x = Math.max(minX, Math.min(maxX, imageTransform.x));
+        imageTransform.y = Math.max(minY, Math.min(maxY, imageTransform.y));
+    };
+
+    const handleStart = (e) => {
+        if (!imageTransform.img) return;
+        e.preventDefault();
+        if (e.touches && e.touches.length === 2) {
+            isDragging = false;
+            initialDistance = getDistance(e.touches);
+            initialScale = imageTransform.scale;
+        } else {
+            isDragging = true;
+            const loc = e.touches ? e.touches[0] : e;
+            imageTransform.lastX = loc.clientX;
+            imageTransform.lastY = loc.clientY;
+        }
+    };
+
+    const handleMove = (e) => {
+        if (!imageTransform.img) return;
+        e.preventDefault();
+        if (animationFrameId) return;
+
+        if (e.touches && e.touches.length === 2) {
+            const currentDistance = getDistance(e.touches);
+            if (initialDistance > 0) {
+                const newScale = initialScale * (currentDistance / initialDistance);
+                // ★ここも minScale に変更
+                imageTransform.scale = Math.max(imageTransform.minScale, newScale);
+            }
+        } else if (isDragging) {
+            const loc = e.touches ? e.touches[0] : e;
+            // マウスの移動をCanvasの解像度スケールに変換する際、
+            // 実際の表示サイズ（CSSの500px）とCanvasの内部解像度（1000px）の比率を考慮
+            const displayToInternalScale = BASE_WIDTH / 500; // 1000 / 500 = 2
+            
+            const dx = (loc.clientX - imageTransform.lastX) * displayToInternalScale; 
+            const dy = (loc.clientY - imageTransform.lastY) * displayToInternalScale;
+            
+            imageTransform.x += dx; 
+            imageTransform.y += dy; 
+            imageTransform.lastX = loc.clientX; 
+            imageTransform.lastY = loc.clientY; 
+        }
+
+        // ★座標を計算した後に制限をかける
+        checkBounds();
+
+        animationFrameId = requestAnimationFrame(() => {
+            drawUserImageLayer();
+            animationFrameId = null;
+        });
+    };
+
+    const handleEnd = () => { isDragging = false; initialDistance = 0; };    
+    
+    uiLayer.addEventListener('mousedown', handleStart);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    // uiLayer.addEventListener('touchstart', handleStart, { passive: false });
+    // uiLayer.addEventListener('touchmove', handleMove, { passive: false });
+    // window.addEventListener('touchend', handleEnd);
+
+
+
+    // ★最適化: UIレイヤーへの最終合成（キャッシュ + 文字）
+    const drawUiLayer = async () => {
+        uiCtx.setTransform(1, 0, 0, 1, 0, 0);
+        uiCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        
+        // 1. キャッシュしたアイコン群を描画（高速）
+        uiCtx.drawImage(iconCompositeCanvas, 0, 0);
+
+        // // 2. 名前を描画（これだけ毎回計算）
+        // if (state.characterName && state.font) {
+        //     const fontName = state.font.split(',')[0].replace(/'/g, '');
+        //     const nameArea = NAME_COORDS[state.position];
+        //     let fontSize = 50;
+        //     uiCtx.font = `${fontSize}px "${fontName}"`;
+        //     while(uiCtx.measureText(state.characterName).width > nameArea.width && fontSize > 10) { fontSize--; uiCtx.font = `${fontSize}px "${fontName}"`; }
+        //     uiCtx.fillStyle = state.nameColor || '#ffffff';
+        //     uiCtx.textAlign = 'center'; uiCtx.textBaseline = 'middle';
+        //     uiCtx.fillText(state.characterName, nameArea.x + nameArea.width / 2, nameArea.y + nameArea.height / 2);
+        uiCtx.font = '48px serif';
+        uiCtx.fillStyle = '#ffffff';
+        uiCtx.fillText("abcx", 50, 50);
+        // }
+    };
+
+    const redrawUiOnly = async () => {
+        // updateState();
+        await drawUiLayer(); // キャッシュを使うので超高速
+    };
+
+    templateSelect.addEventListener('change', async () => {
+        await redrawUiOnly();
+    });
+
+    const templateConfig = {
+        'a': {name: "a"},
+        'b': {name: "b"},
+        'c': {name: "c"}
+    };
+
+
+    // --- 2. 合成とダウンロードの処理 ---
+    document.getElementById('save-btn').addEventListener('click', () => {
+      // 画面には表示しない、合成用のcanvasをメモリ上に作成
+      const offscreenCanvas = document.createElement('canvas');
+      offscreenCanvas.width = backgroundLayer.width;   // サイズを合わせる
+      offscreenCanvas.height = backgroundLayer.height;
+      const oCtx = offscreenCanvas.getContext('2d');
+
+      // 【重要】下のレイヤーから順番に、スタンプを押すように描画していく
+      oCtx.drawImage(backgroundLayer, 0, 0); // まず背景
+      oCtx.drawImage(uiLayer, 0, 0); // その上に手前を重ねる
+
+      // canvasの内容をデータURL（PNG形式）に変換
+      const dataURL = offscreenCanvas.toDataURL('image/png');
+
+      // 擬似的にリンクを作って自動クリックし、ダウンロードさせる
+      const link = document.createElement('a');
+      link.download = 'combined-image.png'; // 保存時のファイル名
+      link.href = dataURL;
+      link.click(); // ダウンロード実行
+    });
+</script>
+</html>
